@@ -10,12 +10,15 @@ from recommendations.user_based import (
     get_recommended_animes,
     lookup_user_id,
 )
-from recommendations.content_based import get_content_recommendations
+from recommendations.content_based import (
+    get_content_recommendations,
+)
 
 # Dependencies
 from dependencies import (
     get_anime_recommendation_dependencies,
     get_user_recommendation_dependencies,
+    get_content_based_dependencies,
 )
 
 # Initialization script
@@ -102,12 +105,12 @@ def get_user_recommendations(
 @app.get("/recommendations/content")
 def get_content_based_recommendations(
     anime_title: str,
-    dependencies: dict = Depends(get_anime_recommendation_dependencies),
+    dependencies: dict = Depends(get_content_based_dependencies),
 ):
     try:
         # Get content-based recommendations
         recommendations = get_content_recommendations(
-            anime_title, dependencies["cosine_sim"], dependencies["df_anime"]
+            anime_title, dependencies["cosine_sim"], dependencies["df_anime"], n=5
         )
         return recommendations
     except ValueError as e:
