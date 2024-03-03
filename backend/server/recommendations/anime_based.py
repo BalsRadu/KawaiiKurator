@@ -35,7 +35,6 @@ def find_similar_animes(name, df_anime, anime_encoder, anime_weights, n=5, neg=F
                 "Genres": genres,
                 "Synopsis": synopsis,
                 "Image URL": image_url,
-                "Similarity": similarity_percentage
             })
 
         # Excluding the queried anime from the results if it's in the list

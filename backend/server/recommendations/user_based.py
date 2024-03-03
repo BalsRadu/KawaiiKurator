@@ -1,7 +1,14 @@
 import pandas as pd
 import numpy as np
 
-def find_similar_users(item_input, n=5, neg=False):
+def lookup_user_id(username, df_score):
+    user_info = df_score[df_score['username'] == username]
+    if not user_info.empty:
+        return user_info.iloc[0]['user_id']
+    return None
+
+
+def find_similar_users(item_input, user_encoder, user_weights, n=10, neg=False):
     try:
         index = item_input
         encoded_index = user_encoder.transform([index])[0]
@@ -24,16 +31,14 @@ def find_similar_users(item_input, n=5, neg=False):
                 SimilarityArr.append({"similar_users": decoded_id, "similarity": similarity})
         Frame = pd.DataFrame(SimilarityArr).sort_values(by="similarity", ascending=False)
         return Frame
-    except:
-        print('\033[1m{}\033[0m, Not Found in User list'.format(item_input))
+    except Exception as e:
+        raise ValueError('\033[1m{}\033[0m, Not Found in User list'.format(item_input))
 
-
-def get_user_preferences(user_id):
+def get_user_preferences(user_id, df_score, df_anime):
     animes_watched_by_user = df_score[df_score['user_id'] == user_id]
 
     if animes_watched_by_user.empty:
-        print("User #{} has not watched any animes.".format(user_id))
-        return pd.DataFrame()
+        raise ValueError("User #{} has not watched any animes.".format(user_id))
 
     user_rating_percentile = np.percentile(animes_watched_by_user.rating, 75)
     animes_watched_by_user = animes_watched_by_user[animes_watched_by_user.rating >= user_rating_percentile]
@@ -47,7 +52,7 @@ def get_user_preferences(user_id):
 
     return anime_df_rows
 
-def get_recommended_animes(similar_users, user_pref, n=10):
+def get_recommended_animes(similar_users, user_pref, df_score, df_anime, n=5):
     recommended_animes = []
     anime_list = []
 
@@ -58,8 +63,7 @@ def get_recommended_animes(similar_users, user_pref, n=10):
             anime_list.append(pref_list.Name.values)
 
     if len(anime_list) == 0:
-        print("No anime recommendations available for the given users.")
-        return pd.DataFrame()
+        raise ValueError("No anime recommendations available for the given users.")
 
     anime_list = pd.DataFrame(anime_list)
     sorted_list = pd.DataFrame(pd.Series(anime_list.values.ravel()).value_counts()).head(n)
@@ -85,23 +89,3 @@ def get_recommended_animes(similar_users, user_pref, n=10):
                 pass
 
     return pd.DataFrame(recommended_animes)
-
-# Select a random user
-ratings_per_user = df_score.groupby('user_id').size()
-random_user = int(ratings_per_user[ratings_per_user < 500].sample(1, random_state=None).index[0])
-
-# Find similar users to the random user
-similar_users = find_similar_users(random_user, n=10, neg=False)
-similar_users = similar_users[similar_users.similarity > 0.4]
-similar_users = similar_users[similar_users.similar_users != random_user]
-similar_users
-
-# Get user preferences for the random user
-user_pref = get_user_preferences(random_user)
-pd.DataFrame(user_pref).head(5)
-
-# Get recommended animes for the random user
-recommended_animes = get_recommended_animes(similar_users, user_pref, n=5)
-
-print('\n> Top recommendations for user: {}'.format(random_user))
-recommended_animes

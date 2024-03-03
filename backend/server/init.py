@@ -58,29 +58,34 @@ def init_app():
     global user_weights
 
     # Load the dataset
-    df_score=pd.read_csv('../datasets/users-score-2023.csv', usecols=["user_id","anime_id","rating"])
+    print("Loading the dataset...")
+    df_score=pd.read_csv('../datasets/users-score-2023.csv')
     df_anime=pd.read_csv('../datasets/anime-dataset-2023.csv')
 
     # Scaling our "rating" column
     # Create a MinMaxScaler object
+    print("Scaling the dataset...")
     scaler = MinMaxScaler(feature_range=(0, 1))
-
     # Scale the 'score' column between 0 and 1
     df_score['scaled_score'] = scaler.fit_transform(df_score[['rating']])
 
     ## Encoding user IDs
+    print("Encoding user IDs...")
     user_encoder = LabelEncoder()
     df_score["user_encoded"] = user_encoder.fit_transform(df_score["user_id"])
     num_users = len(user_encoder.classes_)
 
     ## Encoding anime IDs
+    print("Encoding anime IDs...")
     anime_encoder = LabelEncoder()
     df_score["anime_encoded"] = anime_encoder.fit_transform(df_score["anime_id"])
     num_animes = len(anime_encoder.classes_)
 
+    print("Filtering the dataset...")
     popularity_threshold = 50
     df_anime= df_anime.query('Members >= @popularity_threshold')
 
+    print("Initializing the model...")
     recommender_model = RecommenderNet(num_users, num_animes)
     anime_weights = extract_weights('anime_embedding', recommender_model)
     user_weights = extract_weights('user_embedding', recommender_model)
