@@ -21,6 +21,10 @@ def get_df_anime():
 def get_df_score():
     return get_df_score_instance()
 
+def get_cosine_sim_sparse_instance():
+    # This function returns the cosine similarity matrix as a sparse matrix.
+    return get_cosine_sim_sparse_instance()
+
 def get_anime_recommendation_dependencies():
     # This function aggregates the dependencies required for the anime  recommendation functionality.
     return {
@@ -36,4 +40,11 @@ def get_user_recommendation_dependencies():
         "user_encoder": get_user_encoder(),
         "user_weights": get_user_weights(),
         "df_anime": get_df_anime(),
+    }
+
+def get_content_based_dependencies():
+    # This function aggregates the dependencies required for the content-based recommendation functionality.
+    return {
+        "df_anime": get_df_anime(),
+        "cosine_sim": get_cosine_sim_sparse_instance(),
     }

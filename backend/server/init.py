@@ -26,6 +26,7 @@ anime_encoder = None
 recommender_model = None
 anime_weights = None
 user_weights = None
+cosine_sim_sparse = None
 
 # Utility functions
 def extract_weights(name, model):
@@ -56,6 +57,7 @@ def init_app():
     global recommender_model
     global anime_weights
     global user_weights
+    global cosine_sim_sparse
 
     # Load the dataset
     print("Loading the dataset...")
@@ -89,6 +91,14 @@ def init_app():
     recommender_model = RecommenderNet(num_users, num_animes)
     anime_weights = extract_weights('anime_embedding', recommender_model)
     user_weights = extract_weights('user_embedding', recommender_model)
+
+    print("Initializing the cosine similarity matrix...")
+    # Create a TF-IDF vectorizer
+    tfidf = TfidfVectorizer(stop_words='english')
+    # Define a generator to compute TF-IDF matrix on the fly
+    tfidf_matrix_generator = tfidf.fit_transform((genre for genre in df_anime['Genres'].values.astype('U')))
+    # Compute cosine similarity matrix as a sparse matrix
+    cosine_sim_sparse = linear_kernel(tfidf_matrix_generator, tfidf_matrix_generator)
 
 # Getters for global variables
 def get_model_instance():
@@ -133,3 +143,8 @@ def get_user_weights_instance():
         raise ValueError("The user weights have not been initialized yet.")
     return user_weights
 
+def get_cosine_sim_sparse_instance():
+    global cosine_sim_sparse
+    if cosine_sim_sparse is None:
+        raise ValueError("The cosine similarity matrix has not been initialized yet.")
+    return cosine_sim_sparse

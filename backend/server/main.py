@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends
 from recommendations.anime_based import find_similar_animes
 from recommendations.user_based import find_similar_users, get_user_preferences, get_recommended_animes, lookup_user_id
+from recommendations.content_based import get_content_recommendations
 from dependencies import get_anime_recommendation_dependencies, get_user_recommendation_dependencies
 from schemas.anime_schema import AnimeRecommendationRequest
 from schemas.user_schema import UserRecommendationRequest
@@ -37,6 +38,17 @@ def get_user_recommendations(request: UserRecommendationRequest, dependencies: d
         # Get recommended animes based on similar users' preferences
         recommended_animes = get_recommended_animes(similar_users, user_pref, dependencies['df_score'], dependencies['df_anime'], n=5)
         return recommended_animes
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
+
+@app.get("/recommendations/content")
+def get_content_based_recommendations(anime_title: str, dependencies: dict = Depends(get_anime_recommendation_dependencies)):
+    try:
+        # Get content-based recommendations
+        recommendations = get_content_recommendations(anime_title, dependencies['cosine_sim'], dependencies['df_anime'])
+        return recommendations
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
