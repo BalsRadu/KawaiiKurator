@@ -1,13 +1,28 @@
+# FastAPI application entry point
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
+
+# Recommendation functions
 from recommendations.anime_based import find_similar_animes
 from recommendations.user_based import find_similar_users, get_user_preferences, get_recommended_animes, lookup_user_id
 from recommendations.content_based import get_content_recommendations
+
+# Dependencies
 from dependencies import get_anime_recommendation_dependencies, get_user_recommendation_dependencies
-from schemas.anime_schema import AnimeRecommendationRequest
-from schemas.user_schema import UserRecommendationRequest
+
+# Initialization script
 from init import init_app
 
 app = FastAPI()
+
+# Add CORSMiddleware to the application
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],  # Allowed methods
+    allow_headers=["*"],  # Allowed all headers
+)
 
 # Call init_app to perform initial setup
 init_app()
