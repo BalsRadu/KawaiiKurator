@@ -1,5 +1,8 @@
+from init import filter_recommendations
+
+
 # Function to get recommendations based on cosine similarity, genre, and ratings based on score
-def get_content_recommendations(title, cosine_sim, df_anime, n=5):
+def get_content_recommendations(title, filters, cosine_sim, df_anime, n=5):
     idx = df_anime[df_anime["Name"] == title].index[0]
 
     # Compute the similarity scores between the anime at the given index and all other animes
@@ -19,7 +22,14 @@ def get_content_recommendations(title, cosine_sim, df_anime, n=5):
     # Extract the indices of the recommended animes
     recommended_indices = [idx for idx, _ in top_animes]
     recommended_animes = df_anime.iloc[recommended_indices][
-        ["Name", "Genres", "Score", "Synopsis", "Image URL"]
+        ["Name", "Score", "Genres", "Popularity", "Episodes", "Synopsis", "Image URL"]
     ]
+
+    recommended_animes["Score"].replace("UNKNOWN", 0, inplace=True)
+    recommended_animes["Score"] = recommended_animes["Score"].astype(float)
+    recommended_animes["Episodes"].replace("UNKNOWN", 0, inplace=True)
+    recommended_animes["Episodes"] = recommended_animes["Episodes"].astype(float)
+
+    recommended_animes = filter_recommendations(recommended_animes, filters)
 
     return recommended_animes.head(n).to_dict("records")

@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 
+from init import filter_recommendations
+
 
 def lookup_user_id(username, df_score):
     user_info = df_score[df_score["Username"] == username]
@@ -62,7 +64,7 @@ def get_user_preferences(user_id, df_score, df_anime):
     return anime_df_rows
 
 
-def get_recommended_animes(similar_users, user_pref, df_score, df_anime, n=5):
+def get_recommended_animes(similar_users, user_pref, filters, df_score, df_anime, n=5):
     recommended_animes = []
     anime_list = []
 
@@ -90,10 +92,22 @@ def get_recommended_animes(similar_users, user_pref, df_score, df_anime, n=5):
                     "English name"
                 ].values[0]
                 display_name = anime_name
-                score = df_anime[df_anime.Name == anime_name].Score.values[0]
+                score = float(
+                    df_anime[df_anime.Name == anime_name].Score.values[0]
+                    if df_anime[df_anime.Name == anime_name].Score.values[0]
+                    != "UNKNOWN"
+                    else 0
+                )
                 image_url = df_anime[df_anime.Name == anime_name]["Image URL"].values[0]
                 genre = df_anime[df_anime.Name == anime_name].Genres.values[0]
                 Synopsis = df_anime[df_anime.Name == anime_name].Synopsis.values[0]
+                popularity = df_anime[df_anime.Name == anime_name].Popularity.values[0]
+                episodes = float(
+                    df_anime[df_anime.Name == anime_name].Episodes.values[0]
+                    if df_anime[df_anime.Name == anime_name].Episodes.values[0]
+                    != "UNKNOWN"
+                    else 0
+                )
                 n_user_pref = anime_count.get(
                     anime_id, 0
                 )  # Get the total count of users who have watched this anime
@@ -102,6 +116,8 @@ def get_recommended_animes(similar_users, user_pref, df_score, df_anime, n=5):
                         "Name": display_name,
                         "Score": score,
                         "Genres": genre,
+                        "Popularity": popularity,
+                        "Episodes": episodes,
                         "Synopsis": Synopsis,
                         "Image URL": image_url,
                         "Total Preferences": n_user_pref,
@@ -111,4 +127,6 @@ def get_recommended_animes(similar_users, user_pref, df_score, df_anime, n=5):
                 pass
 
     result_frame = pd.DataFrame(recommended_animes)
+    result_frame = filter_recommendations(result_frame, filters)
+
     return result_frame.head(n).to_dict("records")

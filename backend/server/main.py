@@ -41,11 +41,25 @@ init_app()
 
 @app.get("/recommendations/anime")
 def get_anime_recommendations(
-    anime_name: str, dependencies: dict = Depends(get_anime_recommendation_dependencies)
+    anime_name: str,
+    popularity: int = None,
+    score: float = None,
+    episodes: int = None,
+    genre: str = None,
+    dependencies: dict = Depends(get_anime_recommendation_dependencies),
 ):
     try:
+
+        filters = {
+            "popularity": popularity,
+            "score": score,
+            "episodes": episodes,
+            "genre": genre,
+        }
+
         recommendations = find_similar_animes(
             anime_name,
+            filters,
             dependencies["df_anime"],
             dependencies["anime_encoder"],
             dependencies["anime_weights"],
@@ -61,9 +75,21 @@ def get_anime_recommendations(
 
 @app.get("/recommendations/user")
 def get_user_recommendations(
-    username: str, dependencies: dict = Depends(get_user_recommendation_dependencies)
+    username: str,
+    popularity: int = None,
+    score: float = None,
+    episodes: int = None,
+    genre: str = None,
+    dependencies: dict = Depends(get_user_recommendation_dependencies),
 ):
     try:
+        filters = {
+            "popularity": popularity,
+            "score": score,
+            "episodes": episodes,
+            "genre": genre,
+        }
+
         # Lookup user ID from username.
         user_id = lookup_user_id(username, dependencies["df_score"])
 
@@ -88,6 +114,7 @@ def get_user_recommendations(
         recommended_animes = get_recommended_animes(
             similar_users,
             user_pref,
+            filters,
             dependencies["df_score"],
             dependencies["df_anime"],
             n=5,
@@ -105,12 +132,27 @@ def get_user_recommendations(
 @app.get("/recommendations/content")
 def get_content_based_recommendations(
     anime_title: str,
+    popularity: int = None,
+    score: float = None,
+    episodes: int = None,
+    genre: str = None,
     dependencies: dict = Depends(get_content_based_dependencies),
 ):
     try:
+        filters = {
+            "popularity": popularity,
+            "score": score,
+            "episodes": episodes,
+            "genre": genre,
+        }
+
         # Get content-based recommendations
         recommendations = get_content_recommendations(
-            anime_title, dependencies["cosine_sim"], dependencies["df_anime"], n=5
+            anime_title,
+            filters,
+            dependencies["cosine_sim"],
+            dependencies["df_anime"],
+            n=5,
         )
         return recommendations
     except ValueError as e:

@@ -51,6 +51,22 @@ def extract_weights(name, model):
     return normalized_weights_np
 
 
+def filter_recommendations(df: pd.DataFrame, filters: dict):
+    if filters is None:
+        return df
+    for key, value in filters.items():
+        if value is not None:
+            if key == "popularity":
+                df = df[df["Popularity"] <= value]
+            elif key == "score":
+                df = df[df["Score"] >= value]
+            elif key == "episodes":
+                df = df[df["Episodes"] >= value]
+            elif key == "genre":
+                df = df[df["Genres"].str.contains(value, case=False, na=False)]
+    return df
+
+
 # Initialize the app
 def init_app():
     global df_score
