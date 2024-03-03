@@ -75,15 +75,19 @@ def get_recommended_animes(similar_users, user_pref, df_score, df_anime, n=5):
             try:
                 anime_id = df_anime[df_anime.Name == anime_name].anime_id.values[0]
                 english_name = df_anime[df_anime['Name'] == anime_name]['English name'].values[0]
-                name = english_name if english_name != "UNKNOWN" else anime_name
+                display_name = anime_name
+                score = df_anime[df_anime.Name == anime_name].Score.values[0]
+                image_url = df_anime[df_anime.Name == anime_name]['Image URL'].values[0]
                 genre = df_anime[df_anime.Name == anime_name].Genres.values[0]
                 Synopsis = df_anime[df_anime.Name == anime_name].Synopsis.values[0]
                 n_user_pref = anime_count.get(anime_id, 0)  # Get the total count of users who have watched this anime
                 recommended_animes.append({
-                    "n": n_user_pref,
-                    "anime_name": anime_name,
+                    "Name": display_name,
+                    "Score": score,
                     "Genres": genre,
-                    "Synopsis": Synopsis
+                    "Synopsis": Synopsis,
+                    "Image URL": image_url,
+                    "Total Preferences": n_user_pref,
                 })
             except:
                 pass

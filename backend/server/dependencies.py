@@ -28,3 +28,12 @@ def get_anime_recommendation_dependencies():
         "anime_encoder": get_anime_encoder(),
         "anime_weights": get_anime_weights(),
     }
+
+def get_user_recommendation_dependencies():
+    # This function aggregates the dependencies required for the user recommendation functionality.
+    return {
+        "df_score": get_df_score(),
+        "user_encoder": get_user_encoder(),
+        "user_weights": get_user_weights(),
+        "df_anime": get_df_anime(),
+    }
