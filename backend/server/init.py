@@ -1,6 +1,7 @@
 # Add the parent directory to the path
 import sys
-sys.path.append('..')
+
+sys.path.append("..")
 
 ### Basic libraries
 import numpy as np
@@ -28,6 +29,7 @@ anime_weights = None
 user_weights = None
 cosine_sim_sparse = None
 
+
 # Utility functions
 def extract_weights(name, model):
     # Access the embedding layer directly by name
@@ -48,6 +50,7 @@ def extract_weights(name, model):
 
     return normalized_weights_np
 
+
 # Initialize the app
 def init_app():
     global df_score
@@ -61,15 +64,15 @@ def init_app():
 
     # Load the dataset
     print("Loading the dataset...")
-    df_score=pd.read_csv('../datasets/users-score-2023.csv')
-    df_anime=pd.read_csv('../datasets/anime-dataset-2023.csv')
+    df_score = pd.read_csv("../datasets/users-score-2023.csv")
+    df_anime = pd.read_csv("../datasets/anime-dataset-2023.csv")
 
     # Scaling our "rating" column
     # Create a MinMaxScaler object
     print("Scaling the dataset...")
     scaler = MinMaxScaler(feature_range=(0, 1))
     # Scale the 'score' column between 0 and 1
-    df_score['scaled_score'] = scaler.fit_transform(df_score[['rating']])
+    df_score["scaled_score"] = scaler.fit_transform(df_score[["rating"]])
 
     ## Encoding user IDs
     print("Encoding user IDs...")
@@ -85,20 +88,26 @@ def init_app():
 
     print("Filtering the dataset...")
     popularity_threshold = 50
-    df_anime= df_anime.query('Members >= @popularity_threshold')
+    df_anime = df_anime.query("Members >= @popularity_threshold")
 
     print("Initializing the model...")
     recommender_model = RecommenderNet(num_users, num_animes)
-    anime_weights = extract_weights('anime_embedding', recommender_model)
-    user_weights = extract_weights('user_embedding', recommender_model)
+    recommender_model.load_state_dict(
+        torch.load("../models/anime_recommender_weights.pt")
+    )
+    anime_weights = extract_weights("anime_embedding", recommender_model)
+    user_weights = extract_weights("user_embedding", recommender_model)
 
     print("Initializing the cosine similarity matrix...")
     # Create a TF-IDF vectorizer
-    tfidf = TfidfVectorizer(stop_words='english')
+    tfidf = TfidfVectorizer(stop_words="english")
     # Define a generator to compute TF-IDF matrix on the fly
-    tfidf_matrix_generator = tfidf.fit_transform((genre for genre in df_anime['Genres'].values.astype('U')))
+    tfidf_matrix_generator = tfidf.fit_transform(
+        (genre for genre in df_anime["Genres"].values.astype("U"))
+    )
     # Compute cosine similarity matrix as a sparse matrix
     cosine_sim_sparse = linear_kernel(tfidf_matrix_generator, tfidf_matrix_generator)
+
 
 # Getters for global variables
 def get_model_instance():
@@ -107,11 +116,13 @@ def get_model_instance():
         raise ValueError("The model has not been initialized yet.")
     return recommender_model
 
+
 def get_user_encoder_instance():
     global user_encoder
     if user_encoder is None:
         raise ValueError("The user encoder has not been initialized yet.")
     return user_encoder
+
 
 def get_anime_encoder_instance():
     global anime_encoder
@@ -119,11 +130,13 @@ def get_anime_encoder_instance():
         raise ValueError("The anime encoder has not been initialized yet.")
     return anime_encoder
 
+
 def get_df_score_instance():
     global df
     if df is None:
         raise ValueError("The dataframe has not been initialized yet.")
     return df
+
 
 def get_df_anime_instance():
     global df_anime
@@ -131,17 +144,20 @@ def get_df_anime_instance():
         raise ValueError("The anime dataframe has not been initialized yet.")
     return df_anime
 
+
 def get_anime_weights_instance():
     global anime_weights
     if anime_weights is None:
         raise ValueError("The anime weights have not been initialized yet.")
     return anime_weights
 
+
 def get_user_weights_instance():
     global user_weights
     if user_weights is None:
         raise ValueError("The user weights have not been initialized yet.")
     return user_weights
+
 
 def get_cosine_sim_sparse_instance():
     global cosine_sim_sparse
