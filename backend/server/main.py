@@ -63,16 +63,24 @@ def get_user_recommendations(
     try:
         # Lookup user ID from username.
         user_id = lookup_user_id(username, dependencies["df_score"])
+
         # Find similar users
         similar_users = find_similar_users(
-            username, dependencies["user_encoder"], dependencies["user_weights"], n=10
+            int(user_id),
+            dependencies["user_encoder"],
+            dependencies["user_weights"],
+            n=10,
         )
-        similar_users = similar_users[similar_users.similarity > 0.4]
+
+        # get top 5 similar users
         similar_users = similar_users[similar_users.similar_users != user_id]
+        similar_users = similar_users[:10]
+
         # Get user preferences
         user_pref = get_user_preferences(
             user_id, dependencies["df_score"], dependencies["df_anime"]
         )
+
         # Get recommended animes based on similar users' preferences
         recommended_animes = get_recommended_animes(
             similar_users,
@@ -81,6 +89,7 @@ def get_user_recommendations(
             dependencies["df_anime"],
             n=5,
         )
+
         return recommended_animes
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

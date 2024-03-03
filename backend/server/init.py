@@ -132,10 +132,10 @@ def get_anime_encoder_instance():
 
 
 def get_df_score_instance():
-    global df
-    if df is None:
+    global df_score
+    if df_score is None:
         raise ValueError("The dataframe has not been initialized yet.")
-    return df
+    return df_score
 
 
 def get_df_anime_instance():
