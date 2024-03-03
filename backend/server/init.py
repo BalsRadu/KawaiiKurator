@@ -1,3 +1,7 @@
+# Add the parent directory to the path
+import sys
+sys.path.append('..')
+
 ### Basic libraries
 import numpy as np
 import pandas as pd
@@ -12,7 +16,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 
 # Import the recomandation model
-from ..models.recommender_net import RecommenderNet
+from models.recommender_net import RecommenderNet
 
 # Global variables
 df_score = None
@@ -62,16 +66,16 @@ def init_app():
     scaler = MinMaxScaler(feature_range=(0, 1))
 
     # Scale the 'score' column between 0 and 1
-    df_score['scaled_score'] = scaler.fit_transform(df[['rating']])
+    df_score['scaled_score'] = scaler.fit_transform(df_score[['rating']])
 
     ## Encoding user IDs
     user_encoder = LabelEncoder()
-    df["user_encoded"] = user_encoder.fit_transform(df["user_id"])
+    df_score["user_encoded"] = user_encoder.fit_transform(df_score["user_id"])
     num_users = len(user_encoder.classes_)
 
     ## Encoding anime IDs
     anime_encoder = LabelEncoder()
-    df["anime_encoded"] = anime_encoder.fit_transform(df["anime_id"])
+    df_score["anime_encoded"] = anime_encoder.fit_transform(df_score["anime_id"])
     num_animes = len(anime_encoder.classes_)
 
     popularity_threshold = 50

@@ -1,8 +1,8 @@
 from fastapi import FastAPI, HTTPException, Depends
-from .recommendations.anime_based import find_similar_animes
-from .dependencies import get_anime_recommendation_dependencies
-from .schemas.anime_schema import AnimeRecommendationRequest
-from .init import init_app
+from recommendations.anime_based import find_similar_animes
+from dependencies import get_anime_recommendation_dependencies
+from schemas.anime_schema import AnimeRecommendationRequest
+from init import init_app
 
 app = FastAPI()
 

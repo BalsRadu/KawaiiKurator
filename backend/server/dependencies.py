@@ -1,4 +1,4 @@
-from .init import get_anime_encoder_instance, get_anime_weights_instance, get_model_instance, get_user_encoder_instance, get_user_weights_instance, get_df_anime_instance, get_df_score_instance
+from init import get_anime_encoder_instance, get_anime_weights_instance, get_model_instance, get_user_encoder_instance, get_user_weights_instance, get_df_anime_instance, get_df_score_instance
 
 def get_model():
     return get_model_instance()
